@@ -1,399 +1,233 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CMTG Dashboard — Claros Mortgage Trust</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-  :root {
-    --bg: #ffffff;
-    --bg2: #f7f6f3;
-    --bg3: #f0efe9;
-    --text: #1a1a1a;
-    --text2: #5a5a58;
-    --text3: #999896;
-    --border: rgba(0,0,0,0.10);
-    --border2: rgba(0,0,0,0.16);
-    --blue: #185FA5;
-    --blue-bg: #E6F1FB;
-    --blue-text: #0C447C;
-    --green: #3B6D11;
-    --green-bg: #EAF3DE;
-    --red: #A32D2D;
-    --red-bg: #FCEBEB;
-    --amber: #854F0B;
-    --amber-bg: #FAEEDA;
-    --purple: #5B50C8;
-    --purple-bg: #EEEDFE;
-    --radius: 10px;
-    --radius-sm: 6px;
-  }
-  @media (prefers-color-scheme: dark) {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMTG Dashboard — Dark Mode</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
     :root {
-      --bg: #1c1c1a;
-      --bg2: #252523;
-      --bg3: #2e2e2c;
-      --text: #f0efe9;
-      --text2: #a0a09e;
-      --text3: #666664;
-      --border: rgba(255,255,255,0.09);
-      --border2: rgba(255,255,255,0.15);
-      --blue: #85B7EB;
-      --blue-bg: #0C2A44;
-      --blue-text: #B5D4F4;
-      --green: #97C459;
-      --green-bg: #1a2e0a;
-      --red: #F09595;
-      --red-bg: #3a1010;
-      --amber: #EF9F27;
-      --amber-bg: #3a2005;
-      --purple: #A99EFF;
-      --purple-bg: #262040;
+      --bg: #111315;
+      --bg2: #171a1d;
+      --bg3: #0b0d0f;
+      --text: #f3f4f6;
+      --text2: #b4bbc5;
+      --text3: #7e8794;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.16);
+      --blue: #8ec5ff;
+      --blue-bg: #11263a;
+      --blue-text: #b8dcff;
+      --green: #9ee37d;
+      --green-bg: #122212;
+      --red: #ff9a9a;
+      --red-bg: #301313;
+      --amber: #ffc46b;
+      --amber-bg: #32230d;
+      --purple: #b7a7ff;
+      --purple-bg: #211a3f;
+      --teal: #60d5c5;
+      --magenta: #d68cff;
+      --radius: 12px;
+      --radius-sm: 8px;
     }
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
-  .app { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-  .header { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; margin-bottom: 1rem; display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  .header-left h1 { font-size: 20px; font-weight: 500; color: var(--text); }
-  .header-left p { font-size: 12px; color: var(--text3); margin-top: 3px; }
-  .header-right { text-align: right; }
-  .price-live { font-size: 30px; font-weight: 500; color: var(--text); }
-  .price-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; margin-left: 8px; }
-  .price-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B6D11; display: inline-block; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-  .tabs { display: flex; gap: 4px; margin-bottom: 1rem; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 6px; overflow-x:auto; }
-  .tab { flex: 1; padding: 8px 12px; border-radius: var(--radius-sm); border: none; background: transparent; color: var(--text2); font-size: 13px; cursor: pointer; transition: all 0.15s; font-family: inherit; white-space: nowrap; }
-  .tab:hover { background: var(--bg2); color: var(--text); }
-  .tab.active { background: var(--blue-bg); color: var(--blue-text); font-weight: 500; }
-  .panel { display: none; }
-  .panel.active { display: block; }
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1rem; }
-  .mc { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
-  .mc-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .mc-val { font-size: 22px; font-weight: 500; }
-  .mc-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .c-red { color: var(--red); }
-  .c-amber { color: var(--amber); }
-  .c-green { color: var(--green); }
-  .c-blue { color: var(--blue); }
-  .c-purple { color: var(--purple); }
-  .card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
-  .card-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; flex-wrap:wrap; }
-  .card-title span { font-size: 11px; font-weight: 400; color: var(--text3); }
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
-  .three-col { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
-  @media (max-width: 850px) { .three-col { grid-template-columns: 1fr; } }
-  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } .tabs { flex-wrap: wrap; } .tab { flex: none; } }
-  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .data-table th { font-size: 11px; font-weight: 500; color: var(--text3); text-align: left; padding: 0 10px 10px; border-bottom: 0.5px solid var(--border); }
-  .data-table th.right { text-align: right; }
-  .data-table td { padding: 10px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; }
-  .data-table td.right { text-align: right; font-weight: 500; }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--bg2); }
-  .mat-bar-wrap { display: flex; align-items: center; gap: 8px; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
-  .badge-red { background: var(--red-bg); color: var(--red); }
-  .badge-amber { background: var(--amber-bg); color: var(--amber); }
-  .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
-  .badge-green { background: var(--green-bg); color: var(--green); }
-  .badge-purple { background: var(--purple-bg); color: var(--purple); }
-  .progress { height: 8px; background: var(--bg2); border-radius: 4px; overflow: hidden; margin-top: 6px; }
-  .progress-fill { height: 100%; border-radius: 4px; }
-  .sh-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
-  .sh-row:last-child { border-bottom: none; }
-  .sh-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
-  .sh-name { flex: 1; font-size: 13px; font-weight: 500; }
-  .sh-sub { font-size: 11px; color: var(--text3); }
-  .sh-right { text-align: right; }
-  .sh-pct { font-size: 15px; font-weight: 500; }
-  .sh-chg { font-size: 11px; }
-  .chart-wrap { position: relative; width: 100%; }
-  .link-btn { display: inline-flex; align-items: center; gap: 5px; background: var(--bg2); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 6px 12px; font-size: 12px; color: var(--text2); text-decoration: none; cursor: pointer; transition: background 0.15s; }
-  .link-btn:hover { background: var(--bg3); }
-  .link-btn-primary { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue); }
-  .refresh-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
-  .refresh-info { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
-  .refresh-links { display: flex; gap: 6px; flex-wrap: wrap; }
-  .sec-label { font-size: 11px; color: var(--text3); letter-spacing: 0.07em; text-transform: uppercase; margin: 1.25rem 0 0.75rem; }
-  .insight-box { background: var(--bg2); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--text2); line-height: 1.6; }
-  .rank-list { display:grid; gap:8px; }
-  .rank-item { display:flex; justify-content:space-between; align-items:center; padding:8px 10px; border-radius:8px; background:var(--bg2); font-size:12px; }
-  .transcript-box { background: var(--bg2); border-radius: var(--radius-sm); padding: 14px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
-  footer { font-size: 11px; color: var(--text3); text-align: center; margin-top: 2rem; line-height: 1.8; }
-</style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+    .app { max-width: 1220px; margin: 0 auto; padding: 24px 16px 40px; }
+    .header { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+    .header h1 { font-size: 22px; font-weight: 600; }
+    .header p { font-size: 12px; color: var(--text3); margin-top: 4px; }
+    .price-live { font-size: 32px; font-weight: 600; }
+    .price-badge { margin-left: 8px; font-size: 13px; }
+    .price-meta { font-size: 11px; color: var(--text3); margin-top: 4px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--green); }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px; }
+    .tab { flex: 1; min-width: fit-content; background: transparent; border: none; color: var(--text2); padding: 10px 14px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; }
+    .tab.active { background: var(--blue-bg); color: var(--blue-text); font-weight: 600; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .mc, .card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); }
+    .mc { padding: 14px 16px; }
+    .mc-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+    .mc-val { font-size: 22px; font-weight: 600; }
+    .mc-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+    .card { padding: 18px; margin-bottom: 14px; }
+    .card-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 14px; font-size: 13px; color: var(--text2); font-weight: 600; flex-wrap: wrap; }
+    .card-title span { font-size: 11px; color: var(--text3); font-weight: 400; }
+    .card-title a, .source-links a, .source-pill { color: var(--blue-text); text-decoration: none; }
+    .source-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; background: var(--blue-bg); border: 1px solid rgba(142,197,255,0.18); font-size: 11px; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .four-col { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    @media (max-width: 980px) { .four-col, .three-col, .two-col { grid-template-columns: 1fr; } }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-size: 11px; color: var(--text3); padding: 0 10px 10px; border-bottom: 1px solid var(--border); }
+    td { padding: 10px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    .right { text-align: right; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge-blue { background: var(--blue-bg); color: var(--blue-text); }
+    .badge-red { background: var(--red-bg); color: var(--red); }
+    .badge-green { background: var(--green-bg); color: var(--green); }
+    .badge-amber { background: var(--amber-bg); color: var(--amber); }
+    .badge-purple { background: var(--purple-bg); color: var(--purple); }
+    .c-blue { color: var(--blue); }
+    .c-red { color: var(--red); }
+    .c-green { color: var(--green); }
+    .c-amber { color: var(--amber); }
+    .c-purple { color: var(--purple); }
+    .chart-wrap { position: relative; width: 100%; height: 300px; }
+    .chart-wrap.sm { height: 220px; }
+    .insight { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; color: var(--text2); font-size: 12px; line-height: 1.7; }
+    .holder-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .holder-row:last-child { border-bottom: none; }
+    .avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: 0 0 auto; }
+    .holder-main { flex: 1; }
+    .holder-name { font-size: 13px; font-weight: 600; }
+    .holder-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+    .holder-right { text-align: right; }
+    .holder-pct { font-size: 15px; font-weight: 700; }
+    .progress { width: 140px; height: 7px; background: var(--bg2); border-radius: 999px; margin-top: 5px; overflow: hidden; }
+    .fill { height: 100%; }
+    .rank-list { display: grid; gap: 8px; }
+    .rank-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg2); border: 1px solid var(--border); padding: 10px 12px; border-radius: 10px; font-size: 12px; }
+    .source-links { display: flex; gap: 8px; flex-wrap: wrap; }
+    .transcript-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.75; white-space: pre-wrap; }
+    footer { margin-top: 20px; text-align: center; color: var(--text3); font-size: 11px; line-height: 1.8; }
+  </style>
 </head>
 <body>
 <div class="app">
-
   <div class="header">
-    <div class="header-left">
+    <div>
       <h1>CMTG · Claros Mortgage Trust, Inc.</h1>
-      <p>NYSE · Mortgage REIT · Transitional CRE Loans</p>
+      <p>Dark Mode · Deploy-ready static dashboard with server transcript stub</p>
     </div>
-    <div class="header-right">
-      <div>
-        <span class="price-live" id="live-price">$—</span>
-        <span class="price-badge" id="live-change" style="color:var(--text3)">—</span>
-      </div>
-      <div class="price-meta">
-        <span class="status-dot" id="status-dot" style="background:var(--text3)"></span>
-        &nbsp;<span id="price-ts">데이터 불러오는 중…</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="refresh-bar">
-    <div class="refresh-info">
-      <span id="last-updated">마지막 업데이트: —</span>
-      &nbsp;|&nbsp;
-      <button class="link-btn" onclick="fetchLive()">↻ 새로고침</button>
-    </div>
-    <div class="refresh-links">
-      <a class="link-btn" href="https://finance.yahoo.com/quote/CMTG/" target="_blank">Yahoo Finance ↗</a>
-      <a class="link-btn" href="https://www.sec.gov/edgar/search/" target="_blank">SEC EDGAR ↗</a>
-      <a class="link-btn" href="https://www.clarosmortgage.com/investor-relations" target="_blank">IR 페이지 ↗</a>
-      <a class="link-btn link-btn-primary" href="https://stockanalysis.com/stocks/cmtg/" target="_blank">실시간 상세 ↗</a>
+    <div style="text-align:right;">
+      <div><span class="price-live" id="live-price">$2.26</span><span class="price-badge c-red" id="live-change">▼ -0.88%</span></div>
+      <div class="price-meta"><span class="status-dot" id="status-dot"></span> <span id="price-ts">정적 예시 데이터 표시 중</span></div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="showTab(event, 'overview')">📊 Overview</button>
-    <button class="tab" onclick="showTab(event, 'leverage')">🏦 Leverage Financing</button>
-    <button class="tab" onclick="showTab(event, 'correlation')">🔗 Macro Correlation</button>
-    <button class="tab" onclick="showTab(event, 'market')">📈 P/NAV · Short</button>
-    <button class="tab" onclick="showTab(event, 'shareholders')">👥 주요 주주</button>
-    <button class="tab" onclick="showTab(event, 'cecl')">🧾 CECL</button>
-    <button class="tab" onclick="showTab(event, 'transcript')">🗣 Transcript</button>
+    <button class="tab active" onclick="showTab(event,'overview')">Overview</button>
+    <button class="tab" onclick="showTab(event,'correlation')">Macro Correlation</button>
+    <button class="tab" onclick="showTab(event,'market')">P/NAV · Short</button>
+    <button class="tab" onclick="showTab(event,'holders')">Holders</button>
+    <button class="tab" onclick="showTab(event,'cecl')">CECL</button>
+    <button class="tab" onclick="showTab(event,'peer')">Peer Analysis</button>
+    <button class="tab" onclick="showTab(event,'transcript')">Transcript</button>
   </div>
 
   <div id="tab-overview" class="panel active">
     <div class="metric-grid">
-      <div class="mc"><div class="mc-label">현재가</div><div class="mc-val c-blue" id="m-price">$2.26</div><div class="mc-sub">USD · NYSE</div></div>
-      <div class="mc"><div class="mc-label">시가총액</div><div class="mc-val">$318M</div><div class="mc-sub">소형주</div></div>
-      <div class="mc"><div class="mc-label">주당 장부가</div><div class="mc-val c-amber">$10.69</div><div class="mc-sub">P/B 0.21x</div></div>
-      <div class="mc"><div class="mc-label">목표 주가</div><div class="mc-val c-green">$3.17</div><div class="mc-sub">상승여력 +40%</div></div>
-      <div class="mc"><div class="mc-label">대출 포트폴리오</div><div class="mc-val">$3.7B</div><div class="mc-sub">WA 수익률 6.2%</div></div>
-      <div class="mc"><div class="mc-label">총 유동성</div><div class="mc-val">$185M</div><div class="mc-sub">현금 $173M</div></div>
-      <div class="mc"><div class="mc-label">순부채/자본</div><div class="mc-val c-amber">1.9x</div><div class="mc-sub">레버리지</div></div>
-      <div class="mc"><div class="mc-label">52주 범위</div><div class="mc-val" style="font-size:14px">$2.15 – $4.30</div><div class="mc-sub">저점 근처</div></div>
+      <div class="mc"><div class="mc-label">현재가</div><div class="mc-val c-blue">$2.26</div><div class="mc-sub">NYSE</div></div>
+      <div class="mc"><div class="mc-label">Book Value / Share</div><div class="mc-val c-amber">$10.69</div><div class="mc-sub">P/B 0.21x</div></div>
+      <div class="mc"><div class="mc-label">Portfolio</div><div class="mc-val">$3.7B</div><div class="mc-sub">WA yield 6.2%</div></div>
+      <div class="mc"><div class="mc-label">Liquidity</div><div class="mc-val c-green">$185M</div><div class="mc-sub">Cash $173M</div></div>
+      <div class="mc"><div class="mc-label">Net Debt / Equity</div><div class="mc-val c-amber">1.9x</div><div class="mc-sub">Leverage</div></div>
+      <div class="mc"><div class="mc-label">2025 CECL</div><div class="mc-val c-red">$443.1M</div><div class="mc-sub">Year-end</div></div>
     </div>
-
     <div class="two-col">
       <div class="card">
-        <div class="card-title">2025 연간 손익 <span>GAAP 기준</span></div>
-        <table class="data-table">
-          <tr><td>GAAP 순손실 (FY)</td><td class="right c-red">-$489.1M</td></tr>
-          <tr><td>주당 순손실</td><td class="right c-red">-$3.49</td></tr>
-          <tr><td>분배 손실 (FY)</td><td class="right c-red">-$269.0M</td></tr>
-          <tr><td>CECL 대손충당금</td><td class="right c-red">$443.1M</td></tr>
-          <tr><td>Q4 GAAP 순손실</td><td class="right c-red">-$219.2M</td></tr>
-          <tr><td>Q4 CECL 충당금</td><td class="right c-red">-$211.7M</td></tr>
-        </table>
-      </div>
-      <div class="card">
-        <div class="card-title">대차대조표 주요 지표</div>
-        <table class="data-table">
-          <tr><td>무담보 자산</td><td class="right">$541M</td></tr>
-          <tr><td>미인출 대출 약정</td><td class="right">$12M</td></tr>
-          <tr><td>2025년 대출 해결</td><td class="right">21건 · $2.5B</td></tr>
-          <tr><td>워치리스트 잔액</td><td class="right c-amber">$1.5B (13건)</td></tr>
-          <tr><td>HPS 신규 대출 (2026.01)</td><td class="right">$500M · 4년</td></tr>
-          <tr><td>발행 주식수</td><td class="right">140.2M주</td></tr>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">분기별 GAAP 순손실 추이 (2025)</div>
-      <div class="chart-wrap" style="height:220px"><canvas id="lossChart"></canvas></div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">유동성 구성</div>
-        <div class="chart-wrap" style="height:180px"><canvas id="liqChart"></canvas></div>
-        <div style="display:flex;gap:12px;margin-top:12px;font-size:12px;color:var(--text2);flex-wrap:wrap">
-          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#185FA5;margin-right:4px"></span>현금 $173M</span>
-          <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#9FE1CB;margin-right:4px"></span>미인출 한도 $12M</span>
+        <div class="card-title">Quick Read <span>배포용 버전</span></div>
+        <div class="insight">
+          이 파일은 Vercel에 바로 올릴 수 있게 정리한 dark mode 기본 버전입니다.<br>
+          index.html 하나만으로 동작하고, transcript는 /api/transcript 서버 함수로 분리했습니다.<br>
+          숫자는 일부 정적 예시값이며, 각 카드/차트에서 출처 링크를 바로 열 수 있게 구성했습니다.
         </div>
       </div>
       <div class="card">
-        <div class="card-title">포트폴리오 리스크 지표</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">CECL / 전체 UPB</div>
-        <div class="progress"><div class="progress-fill" style="width:10.9%;background:#E24B4A"></div></div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;margin-top:2px">10.9%</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">리스크 5등급 특별 충당금</div>
-        <div class="progress"><div class="progress-fill" style="width:26%;background:#BA7517"></div></div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;margin-top:2px">26.0%</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">워치리스트 비중 (전년比 -45%)</div>
-        <div class="progress"><div class="progress-fill" style="width:40%;background:#BA7517"></div></div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">~40% → 개선 중</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="tab-leverage" class="panel">
-    <div class="metric-grid">
-      <div class="mc"><div class="mc-label">총 파이낸싱 한도</div><div class="mc-val">$5.2B</div><div class="mc-sub">As of Dec 31, 2025</div></div>
-      <div class="mc"><div class="mc-label">총 파이낸싱 UPB</div><div class="mc-val">$3.2B</div><div class="mc-sub">미사용 $2.0B</div></div>
-      <div class="mc"><div class="mc-label">총 레버리지 비율</div><div class="mc-val c-amber">2.5x</div><div class="mc-sub">전분기 2.4x</div></div>
-      <div class="mc"><div class="mc-label">WA Spread</div><div class="mc-val">323bps</div><div class="mc-sub">SOFR 기준</div></div>
-      <div class="mc"><div class="mc-label">HPS 신규 대출</div><div class="mc-val c-blue">$500M</div><div class="mc-sub">SOFR+675bps · 2030</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Instrument 별 파이낸싱 현황 <span>Dec 31, 2025 기준 · Jan 2026 HPS 리파이낸싱 반영</span></div>
-      <div style="overflow-x:auto">
-        <table class="data-table" style="min-width:700px">
-          <thead>
-            <tr>
-              <th>Instrument</th>
-              <th>Counterparty</th>
-              <th class="right">한도 (M$)</th>
-              <th class="right">UPB (M$)</th>
-              <th class="right">Spread (bps)</th>
-              <th class="right">만기</th>
-              <th class="right">상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td><strong>Repurchase Agreements</strong><br><span style="font-size:11px;color:var(--text3)">환매조건부채권 · 자산담보</span></td><td>JPMorgan Chase 外<br><span style="font-size:11px;color:var(--text3)">JPM $1.1B 한도 포함</span></td><td class="right">3,946</td><td class="right">1,952</td><td class="right">292</td><td class="right">Rolling 30–90일</td><td class="right"><span class="badge badge-blue">Rolling</span></td></tr>
-            <tr><td><strong>Term Participation Facility</strong><br><span style="font-size:11px;color:var(--text3)">기간부 참여금융</span></td><td>복수 기관</td><td class="right">235</td><td class="right">235</td><td class="right">292</td><td class="right">~2026</td><td class="right"><span class="badge badge-amber">주의</span></td></tr>
-            <tr><td><strong>Notes Payable</strong><br><span style="font-size:11px;color:var(--text3)">자산담보 개별 대출</span></td><td>복수 기관</td><td class="right">196</td><td class="right">178</td><td class="right">322</td><td class="right">자산별 상이</td><td class="right"><span class="badge badge-blue">안정</span></td></tr>
-            <tr><td><strong>REO Hotel Portfolio Debt</strong><br><span style="font-size:11px;color:var(--text3)">호텔 REO 담보 부채</span></td><td>호텔 프로젝트 파이낸스</td><td class="right">235</td><td class="right">235</td><td class="right">318</td><td class="right">~2026–2027</td><td class="right"><span class="badge badge-amber">주의</span></td></tr>
-            <tr style="background:var(--blue-bg)"><td><strong style="color:var(--blue-text)">HPS Secured Term Loan</strong><br><span style="font-size:11px;color:var(--blue)">2026.01 신규 · 구 Term Loan B 대체</span></td><td style="color:var(--blue-text)">HPS Investment Partners</td><td class="right" style="color:var(--blue-text)">500</td><td class="right" style="color:var(--blue-text)">500</td><td class="right" style="color:var(--blue-text);font-weight:700">675</td><td class="right" style="color:var(--blue-text);font-weight:700">2030.01</td><td class="right"><span class="badge badge-green">안정</span></td></tr>
-            <tr style="font-weight:500;background:var(--bg2)"><td><strong>합계</strong></td><td></td><td class="right">5,112+</td><td class="right">3,100</td><td class="right">~323</td><td class="right">WA ~2028</td><td class="right"></td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">Instrument 별 UPB 비중</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="levPieChart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Spread 비교 (bps, SOFR 기준)</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="spreadChart"></canvas></div>
+        <div class="card-title">Primary Sources <span>click to open</span></div>
+        <div class="source-links">
+          <a class="source-pill" href="https://www.sec.gov/edgar/search/" target="_blank">SEC EDGAR ↗</a>
+          <a class="source-pill" href="https://www.newyorkfed.org/markets/reference-rates/sofr" target="_blank">NY Fed SOFR ↗</a>
+          <a class="source-pill" href="https://finance.yahoo.com/quote/CMTG/" target="_blank">Yahoo CMTG ↗</a>
+          <a class="source-pill" href="https://www.finra.org/finra-data/browse-catalog/short-sale-volume-data" target="_blank">FINRA Short ↗</a>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="tab-correlation" class="panel">
     <div class="metric-grid">
-      <div class="mc"><div class="mc-label">비교 기준</div><div class="mc-val" style="font-size:16px">Indexed to 100</div><div class="mc-sub">시작점 정규화</div></div>
-      <div class="mc"><div class="mc-label">기간</div><div class="mc-val" style="font-size:16px">2025.01–2026.03</div><div class="mc-sub">월별 예시</div></div>
+      <div class="mc"><div class="mc-label">비교 방식</div><div class="mc-val" style="font-size:17px;">Indexed 100</div><div class="mc-sub">시작점 정규화</div></div>
+      <div class="mc"><div class="mc-label">기간</div><div class="mc-val" style="font-size:17px;">2025.01–2026.03</div><div class="mc-sub">월별 예시</div></div>
       <div class="mc"><div class="mc-label">최고 상관</div><div class="mc-val c-green" id="bestCorrName">—</div><div class="mc-sub" id="bestCorrVal">—</div></div>
       <div class="mc"><div class="mc-label">최저 상관</div><div class="mc-val c-red" id="worstCorrName">—</div><div class="mc-sub" id="worstCorrVal">—</div></div>
     </div>
-
     <div class="card">
-      <div class="card-title">SOFR · CMTG · S&P 500 · Russell 3000 시계열 비교 <span>CMTG 기준 상관계수 순위 별도 표시</span></div>
-      <div class="chart-wrap" style="height:320px"><canvas id="corrChart"></canvas></div>
+      <div class="card-title">SOFR · CMTG · S&P 500 · Russell 3000 <span>CMTG 기준 상관계수 순위</span><a class="source-pill" href="https://www.newyorkfed.org/markets/reference-rates/sofr" target="_blank">SOFR ↗</a></div>
+      <div class="chart-wrap"><canvas id="corrChart"></canvas></div>
     </div>
-
     <div class="three-col">
-      <div class="card">
-        <div class="card-title">상관관계 순위</div>
-        <div id="corrRanking" class="rank-list"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">해석 포인트</div>
-        <div class="insight-box">
-          ① 단위가 다른 금리와 주가를 같은 축에서 비교하기 위해 100 기준으로 정규화했습니다.<br>
-          ② CMTG는 대체로 broad equity보다 idiosyncratic credit 이벤트 영향이 큽니다.<br>
-          ③ SOFR와 주가의 단순 상관은 인과관계가 아니라 방향성 힌트로 보는 것이 적절합니다.
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">주의사항</div>
-        <div class="insight-box">
-          현재 값은 정적 예시 데이터입니다.<br>
-          실전 적용 시 SOFR는 NY Fed, 주가는 Yahoo/Polygon/Alpha Vantage 등으로 분리 수집 후 월말 기준으로 정렬하세요.
-        </div>
-      </div>
+      <div class="card"><div class="card-title">상관관계 순위</div><div id="corrRanking" class="rank-list"></div></div>
+      <div class="card"><div class="card-title">주가 지수 출처</div><div class="source-links"><a class="source-pill" href="https://finance.yahoo.com/quote/%5EGSPC/" target="_blank">S&P 500 ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/%5ERUA/" target="_blank">Russell 3000 ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/CMTG/" target="_blank">CMTG ↗</a></div></div>
+      <div class="card"><div class="card-title">해석</div><div class="insight">금리와 주가를 같은 축에서 보기 위해 100 기준으로 정규화했습니다. 단순 상관은 방향성 참고용이고, CMTG는 broad market보다 개별 credit event에 더 크게 반응할 수 있습니다.</div></div>
     </div>
   </div>
 
   <div id="tab-market" class="panel">
     <div class="metric-grid">
-      <div class="mc"><div class="mc-label">최근 P/NAV</div><div class="mc-val c-blue">0.19x</div><div class="mc-sub">2026 Q1 예시</div></div>
-      <div class="mc"><div class="mc-label">최근 Short % Float</div><div class="mc-val c-red">3.0%</div><div class="mc-sub">격주/분기 정렬</div></div>
-      <div class="mc"><div class="mc-label">P/NAV vs Short 상관</div><div class="mc-val c-purple" id="pnavShortCorr">—</div><div class="mc-sub">예시 시계열 기준</div></div>
-      <div class="mc"><div class="mc-label">해석</div><div class="mc-val" style="font-size:16px">Valuation Stress</div><div class="mc-sub">디스카운트와 공매도 동학</div></div>
+      <div class="mc"><div class="mc-label">최근 P/NAV</div><div class="mc-val c-blue">0.19x</div><div class="mc-sub">예시</div></div>
+      <div class="mc"><div class="mc-label">최근 Short % Float</div><div class="mc-val c-red">3.0%</div><div class="mc-sub">예시</div></div>
+      <div class="mc"><div class="mc-label">상관계수</div><div class="mc-val c-purple" id="pnavShortCorr">—</div><div class="mc-sub">P/NAV vs short</div></div>
+      <div class="mc"><div class="mc-label">출처</div><div class="mc-val" style="font-size:17px;">Yahoo + FINRA</div><div class="mc-sub">NAV는 공시 기반</div></div>
     </div>
-
     <div class="card">
-      <div class="card-title">P/NAV 시계열과 대차잔고 동시 비교 <span>좌축 P/NAV · 우축 Short % Float</span></div>
-      <div class="chart-wrap" style="height:300px"><canvas id="pnavShortChart"></canvas></div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">거래량 추이 (월별 추정)</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="volumeChart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">대차잔고 추이 (Short Interest, 격주)</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="shortChart"></canvas></div>
-      </div>
+      <div class="card-title">P/NAV vs Short Interest <span>좌축 P/NAV · 우축 Short % Float</span><div class="source-links"><a class="source-pill" href="https://finance.yahoo.com/quote/CMTG/" target="_blank">Price ↗</a><a class="source-pill" href="https://www.finra.org/finra-data/browse-catalog/short-sale-volume-data" target="_blank">FINRA ↗</a></div></div>
+      <div class="chart-wrap"><canvas id="pnavShortChart"></canvas></div>
     </div>
   </div>
 
-  <div id="tab-shareholders" class="panel">
-    <div class="metric-grid">
-      <div class="mc"><div class="mc-label">주요 기준</div><div class="mc-val" style="font-size:16px">13G / 13D / 13F</div><div class="mc-sub">혼합 참조</div></div>
-      <div class="mc"><div class="mc-label">총 발행주식</div><div class="mc-val">140.2M</div><div class="mc-sub">보통주</div></div>
-      <div class="mc"><div class="mc-label">Top Holder</div><div class="mc-val c-blue">Vanguard</div><div class="mc-sub">~8.4%</div></div>
-      <div class="mc"><div class="mc-label">비고</div><div class="mc-val" style="font-size:16px">예시값</div><div class="mc-sub">실제는 SEC 반영</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">주요 기관 주주 현황 <span>13G/13D 우선 + 13F 보강 방식</span></div>
-      <div class="sh-row">
-        <div class="sh-avatar" style="background:#E6F1FB;color:#185FA5">VG</div>
-        <div><div class="sh-name">Vanguard Group</div><div class="sh-sub">13G / 패시브 인덱스</div></div>
-        <div class="sh-right"><div class="sh-pct c-blue">8.4%</div><div class="sh-chg" style="color:var(--text3)">~11.8M주</div><div class="progress" style="width:140px;margin-top:4px"><div class="progress-fill" style="width:84%;background:#185FA5"></div></div></div>
-      </div>
-      <div class="sh-row">
-        <div class="sh-avatar" style="background:#FCEBEB;color:#A32D2D">BL</div>
-        <div><div class="sh-name">BlackRock</div><div class="sh-sub">13G / 패시브 인덱스</div></div>
-        <div class="sh-right"><div class="sh-pct c-red">5.6%</div><div class="sh-chg" style="color:var(--text3)">~7.9M주</div><div class="progress" style="width:140px;margin-top:4px"><div class="progress-fill" style="width:56%;background:#E24B4A"></div></div></div>
-      </div>
-      <div class="sh-row">
-        <div class="sh-avatar" style="background:#EAF3DE;color:#3B6D11">SS</div>
-        <div><div class="sh-name">State Street Global Advisors</div><div class="sh-sub">13F / ETF·인덱스</div></div>
-        <div class="sh-right"><div class="sh-pct c-green">2.1%</div><div class="sh-chg" style="color:var(--text3)">~2.9M주</div><div class="progress" style="width:140px;margin-top:4px"><div class="progress-fill" style="width:21%;background:#3B6D11"></div></div></div>
-      </div>
-      <div class="sh-row">
-        <div class="sh-avatar" style="background:#FAEEDA;color:#854F0B">DI</div>
-        <div><div class="sh-name">Dimensional Fund Advisors</div><div class="sh-sub">13F / 계량·패시브</div></div>
-        <div class="sh-right"><div class="sh-pct c-amber">1.8%</div><div class="sh-chg" style="color:var(--text3)">~2.5M주</div><div class="progress" style="width:140px;margin-top:4px"><div class="progress-fill" style="width:18%;background:#EF9F27"></div></div></div>
-      </div>
-      <div class="sh-row">
-        <div class="sh-avatar" style="background:#EEEDFE;color:#5B50C8">IN</div>
-        <div><div class="sh-name">Insiders / Affiliated</div><div class="sh-sub">내부자·관계자 추정</div></div>
-        <div class="sh-right"><div class="sh-pct c-purple">1.5%</div><div class="sh-chg" style="color:var(--text3)">~2.1M주</div><div class="progress" style="width:140px;margin-top:4px"><div class="progress-fill" style="width:15%;background:#5B50C8"></div></div></div>
-      </div>
-    </div>
-
-    <div class="two-col">
+  <div id="tab-holders" class="panel">
+    <div class="four-col">
       <div class="card">
-        <div class="card-title">기관 보유 비중 구성</div>
-        <div class="chart-wrap" style="height:220px"><canvas id="holdingChart"></canvas></div>
+        <div class="card-title">Current Major Holders <span>13G / 13D / 13F mixed view</span><a class="source-pill" href="https://www.sec.gov/edgar/search/" target="_blank">SEC Search ↗</a></div>
+        <div class="holder-row">
+          <div class="avatar" style="background:#11263a;color:#8ec5ff;">VG</div>
+          <div class="holder-main"><div class="holder-name">Vanguard Group</div><div class="holder-sub">13G / Passive index</div></div>
+          <div class="holder-right"><div class="holder-pct c-blue">8.4%</div><div class="progress"><div class="fill" style="width:84%;background:#8ec5ff"></div></div></div>
+        </div>
+        <div class="holder-row">
+          <div class="avatar" style="background:#301313;color:#ff9a9a;">BL</div>
+          <div class="holder-main"><div class="holder-name">BlackRock</div><div class="holder-sub">13G / Passive index</div></div>
+          <div class="holder-right"><div class="holder-pct c-red">5.6%</div><div class="progress"><div class="fill" style="width:56%;background:#ff9a9a"></div></div></div>
+        </div>
+        <div class="holder-row">
+          <div class="avatar" style="background:#122212;color:#9ee37d;">HI</div>
+          <div class="holder-main"><div class="holder-name">Hyundai Investments</div><div class="holder-sub">Legacy / managed trust positions tagged separately</div></div>
+          <div class="holder-right"><div class="holder-pct c-green">Tracked</div><div class="progress"><div class="fill" style="width:42%;background:#9ee37d"></div></div></div>
+        </div>
+        <div class="holder-row">
+          <div class="avatar" style="background:#32230d;color:#ffc46b;">SS</div>
+          <div class="holder-main"><div class="holder-name">State Street</div><div class="holder-sub">13F / ETF index exposure</div></div>
+          <div class="holder-right"><div class="holder-pct c-amber">2.1%</div><div class="progress"><div class="fill" style="width:21%;background:#ffc46b"></div></div></div>
+        </div>
       </div>
       <div class="card">
-        <div class="card-title">향후 데이터 연결 로직</div>
-        <div class="insight-box">
-          ① 5% 이상 보유자는 13G/13D 우선 확인<br>
-          ② 나머지 기관 보유는 13F 데이터셋으로 보강<br>
-          ③ 종목명·CIK 매칭 후 최신 filing date 기준 정렬<br>
-          ④ 중복 보유자는 filing 우선순위 규칙 적용
+        <div class="card-title">Pre-IPO / Legacy Holders <span>historical bucket</span><a class="source-pill" href="https://www.sec.gov/Archives/edgar/data/1666291/000119312521295453/d25803ds11.htm" target="_blank">S-11 ↗</a></div>
+        <div class="insight">
+          이 섹션은 최신 current holder와 분리해서 보이도록 설계했습니다.<br><br>
+          표시 대상 예시:<br>
+          • Sponsor / affiliated legacy entities<br>
+          • Pre-IPO managed trusts<br>
+          • Historical cornerstone investors<br><br>
+          실제 배포본에서는 filing date와 document type을 함께 표기하는 것이 좋습니다.
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Holder Mix</div>
+        <div class="chart-wrap sm"><canvas id="holdersChart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Holder Rules</div>
+        <div class="insight">
+          1. 5% 이상은 13G/13D 우선<br>
+          2. 나머지는 13F 보강<br>
+          3. Pre-IPO는 S-11 / early 13G 별도 레이어<br>
+          4. 현대인베스트먼트는 별도 태그 유지
         </div>
       </div>
     </div>
@@ -401,32 +235,40 @@
 
   <div id="tab-cecl" class="panel">
     <div class="metric-grid">
-      <div class="mc"><div class="mc-label">2025 Q4 CECL</div><div class="mc-val c-red">$443.1M</div><div class="mc-sub">연말 기준</div></div>
-      <div class="mc"><div class="mc-label">QoQ 증가액</div><div class="mc-val c-red">$135.4M</div><div class="mc-sub">Q3 → Q4</div></div>
-      <div class="mc"><div class="mc-label">UPB 대비 비중</div><div class="mc-val c-amber">10.9%</div><div class="mc-sub">연말 기준</div></div>
-      <div class="mc"><div class="mc-label">핵심 포인트</div><div class="mc-val" style="font-size:16px">Provision Spike</div><div class="mc-sub">하반기 급증</div></div>
+      <div class="mc"><div class="mc-label">2025 Q4 CECL</div><div class="mc-val c-red">$443.1M</div><div class="mc-sub">Year-end</div></div>
+      <div class="mc"><div class="mc-label">QoQ Δ</div><div class="mc-val c-red">$135.4M</div><div class="mc-sub">Q3 to Q4</div></div>
+      <div class="mc"><div class="mc-label">UPB 대비</div><div class="mc-val c-amber">10.9%</div><div class="mc-sub">Year-end</div></div>
+      <div class="mc"><div class="mc-label">Source</div><div class="mc-val" style="font-size:17px;">SEC / IR</div><div class="mc-sub">Quarterly filings</div></div>
     </div>
-
     <div class="two-col">
-      <div class="card">
-        <div class="card-title">분기별 CECL 규모</div>
-        <div class="chart-wrap" style="height:260px"><canvas id="ceclChart"></canvas></div>
-      </div>
-      <div class="card">
-        <div class="card-title">QoQ 증감 분석</div>
-        <div class="chart-wrap" style="height:260px"><canvas id="ceclDeltaChart"></canvas></div>
-      </div>
+      <div class="card"><div class="card-title">Quarterly CECL <a class="source-pill" href="https://www.clarosmortgage.com/investor-relations" target="_blank">IR ↗</a></div><div class="chart-wrap"><canvas id="ceclChart"></canvas></div></div>
+      <div class="card"><div class="card-title">QoQ Change</div><div class="chart-wrap"><canvas id="ceclDeltaChart"></canvas></div></div>
     </div>
+  </div>
 
+  <div id="tab-peer" class="panel">
+    <div class="metric-grid">
+      <div class="mc"><div class="mc-label">Peer Set</div><div class="mc-val" style="font-size:17px;">BXMT · STWD · KREF</div><div class="mc-sub">ACRE · ARI · TRTX</div></div>
+      <div class="mc"><div class="mc-label">비교 방식</div><div class="mc-val" style="font-size:17px;">Indexed Price</div><div class="mc-sub">100 base</div></div>
+      <div class="mc"><div class="mc-label">용도</div><div class="mc-val" style="font-size:17px;">Relative Check</div><div class="mc-sub">Valuation context</div></div>
+      <div class="mc"><div class="mc-label">출처</div><div class="mc-val" style="font-size:17px;">Yahoo</div><div class="mc-sub">Ticker pages</div></div>
+    </div>
     <div class="card">
-      <div class="card-title">분기별 CECL 분석 메모</div>
-      <table class="data-table">
-        <thead><tr><th>분기</th><th class="right">CECL ($M)</th><th class="right">QoQ 변화</th><th class="right">해석</th></tr></thead>
+      <div class="card-title">Peer Indexed Price Performance <span>BXMT STWD KREF ACRE ARI TRTX vs CMTG</span><div class="source-links"><a class="source-pill" href="https://finance.yahoo.com/quote/BXMT/" target="_blank">BXMT ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/STWD/" target="_blank">STWD ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/KREF/" target="_blank">KREF ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/ACRE/" target="_blank">ACRE ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/ARI/" target="_blank">ARI ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/TRTX/" target="_blank">TRTX ↗</a></div></div>
+      <div class="chart-wrap"><canvas id="peerChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Peer Snapshot Table</div>
+      <table>
+        <thead><tr><th>Ticker</th><th class="right">Price</th><th class="right">P/B or P/NAV</th><th class="right">Dividend Yield</th><th class="right">52W Perf</th></tr></thead>
         <tbody>
-          <tr><td>2025 Q1</td><td class="right">119.3</td><td class="right">—</td><td class="right">기초 적립</td></tr>
-          <tr><td>2025 Q2</td><td class="right">295.2</td><td class="right c-red">+175.9</td><td class="right">스트레스 자산 반영 확대</td></tr>
-          <tr><td>2025 Q3</td><td class="right">307.7</td><td class="right c-red">+12.5</td><td class="right">높은 수준 유지</td></tr>
-          <tr><td>2025 Q4</td><td class="right">443.1</td><td class="right c-red">+135.4</td><td class="right">연말 대규모 추가 적립</td></tr>
+          <tr><td>CMTG</td><td class="right">2.26</td><td class="right">0.21x</td><td class="right">0.0%</td><td class="right c-red">Low zone</td></tr>
+          <tr><td>BXMT</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
+          <tr><td>STWD</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
+          <tr><td>KREF</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
+          <tr><td>ACRE</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
+          <tr><td>ARI</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
+          <tr><td>TRTX</td><td class="right">—</td><td class="right">—</td><td class="right">—</td><td class="right">—</td></tr>
         </tbody>
       </table>
     </div>
@@ -434,269 +276,119 @@
 
   <div id="tab-transcript" class="panel">
     <div class="metric-grid">
-      <div class="mc"><div class="mc-label">대상 콜</div><div class="mc-val" style="font-size:16px">Q4 2025</div><div class="mc-sub">예시 요약</div></div>
-      <div class="mc"><div class="mc-label">상태</div><div class="mc-val c-amber" style="font-size:16px">Server Stub</div><div class="mc-sub">Vercel Function 필요</div></div>
-      <div class="mc"><div class="mc-label">향후 구조</div><div class="mc-val" style="font-size:16px">/api/transcript</div><div class="mc-sub">JSON 반환</div></div>
-      <div class="mc"><div class="mc-label">용도</div><div class="mc-val" style="font-size:16px">요약·번역</div><div class="mc-sub">한국어 표시</div></div>
+      <div class="mc"><div class="mc-label">대상 콜</div><div class="mc-val" style="font-size:17px;">Q4 2025</div><div class="mc-sub">Stub</div></div>
+      <div class="mc"><div class="mc-label">구현 방식</div><div class="mc-val" style="font-size:17px;">Vercel Function</div><div class="mc-sub">Server-side</div></div>
+      <div class="mc"><div class="mc-label">출처</div><div class="mc-val" style="font-size:17px;">IR / transcript</div><div class="mc-sub">Direct scrape not recommended</div></div>
+      <div class="mc"><div class="mc-label">언어</div><div class="mc-val" style="font-size:17px;">한국어 요약</div><div class="mc-sub">UI output</div></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Earnings Transcript 한국어 요약 <span>Yahoo/SA 직접 브라우저 크롤링 대신 서버 함수 권장</span></div>
-      <div id="transcriptSummary" class="transcript-box">불러오는 중…</div>
-    </div>
-
-    <div class="two-col">
-      <div class="card">
-        <div class="card-title">권장 구현 순서</div>
-        <div class="insight-box">
-          ① transcript 원문 텍스트 확보<br>
-          ② Vercel Function에서 요약·번역<br>
-          ③ JSON 응답을 index.html에서 렌더링<br>
-          ④ 분기 선택 드롭다운 추가
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">현재 상태</div>
-        <div class="insight-box">
-          지금 파일은 정적 요약 stub를 표시합니다.<br>
-          배포 후 `/api/transcript.js`를 같이 올리면 바로 서버 응답 구조로 바꿀 수 있습니다.
-        </div>
-      </div>
+      <div class="card-title">Transcript Summary <span>/api/transcript 호출</span><div class="source-links"><a class="source-pill" href="https://www.clarosmortgage.com/investor-relations/events-and-presentations/default.aspx" target="_blank">IR Events ↗</a><a class="source-pill" href="https://finance.yahoo.com/quote/CMTG/news/" target="_blank">Yahoo News ↗</a></div></div>
+      <div class="transcript-box" id="transcript-box">불러오는 중…</div>
     </div>
   </div>
 
-  <footer>
-    CMTG Dashboard · 업그레이드 버전 초안<br>
-    현재 차트는 일부 정적 예시 데이터 포함 · 실제 투자 판단 전 원문 공시 및 데이터 벤더 재검증 필요
-  </footer>
+  <footer>Deploy-ready package · 일부 수치는 정적 예시값 · 실데이터 연결 전 재검증 필요</footer>
 </div>
 
 <script>
-function showTab(evt, name) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (evt && evt.target) evt.target.classList.add('active');
-}
-
-async function fetchLive() {
-  const dot = document.getElementById('status-dot');
-  const ts = document.getElementById('price-ts');
-  dot.style.background = '#EF9F27';
-  ts.textContent = '데이터 불러오는 중…';
-  try {
-    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/CMTG?interval=1d&range=1d';
-    const res = await fetch(url, { mode: 'cors' });
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    const meta = data.chart.result[0].meta;
-    const price = meta.regularMarketPrice;
-    const prev = meta.chartPreviousClose;
-    const chg = price - prev;
-    const chgPct = (chg / prev) * 100;
-    document.getElementById('live-price').textContent = '$' + price.toFixed(2);
-    document.getElementById('m-price').textContent = '$' + price.toFixed(2);
-    const chgEl = document.getElementById('live-change');
-    const sign = chg >= 0 ? '+' : '';
-    chgEl.textContent = sign + chg.toFixed(2) + ' (' + sign + chgPct.toFixed(2) + '%)';
-    chgEl.style.color = chg >= 0 ? 'var(--green)' : 'var(--red)';
-    dot.style.background = '#3B6D11';
-    const now = new Date();
-    ts.textContent = '실시간 · ' + now.toLocaleTimeString('ko-KR');
-    document.getElementById('last-updated').textContent = '마지막 업데이트: ' + now.toLocaleString('ko-KR');
-  } catch(e) {
-    dot.style.background = '#A32D2D';
-    ts.textContent = '정적 데이터 표시 중 (CORS 차단)';
-    document.getElementById('live-price').textContent = '$2.26';
-    document.getElementById('live-change').textContent = '▼ -0.88%';
-    document.getElementById('live-change').style.color = 'var(--red)';
-    document.getElementById('last-updated').textContent = '마지막 업데이트: 정적 예시';
+  function showTab(evt, name) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    evt.target.classList.add('active');
   }
-}
-fetchLive();
-setInterval(fetchLive, 60000);
 
-const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
-const tc = isDark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
-const gc = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)';
-
-function pearson(a, b) {
-  const n = a.length;
-  const ma = a.reduce((x,y)=>x+y,0)/n;
-  const mb = b.reduce((x,y)=>x+y,0)/n;
-  let num = 0, da = 0, db = 0;
-  for (let i = 0; i < n; i++) {
-    const xa = a[i] - ma;
-    const xb = b[i] - mb;
-    num += xa * xb;
-    da += xa * xa;
-    db += xb * xb;
+  const tc = 'rgba(255,255,255,0.72)';
+  const gc = 'rgba(255,255,255,0.08)';
+  function pearson(a, b) {
+    const n = a.length;
+    const ma = a.reduce((x,y)=>x+y,0)/n;
+    const mb = b.reduce((x,y)=>x+y,0)/n;
+    let num=0, da=0, db=0;
+    for (let i=0;i<n;i++) { const xa=a[i]-ma; const xb=b[i]-mb; num += xa*xb; da += xa*xa; db += xb*xb; }
+    return num / Math.sqrt(da*db);
   }
-  return num / Math.sqrt(da * db);
-}
 
-new Chart(document.getElementById('lossChart'), {
-  type: 'bar',
-  data: {
-    labels: ['Q1 2025','Q2 2025','Q3 2025','Q4 2025'],
-    datasets: [{ label: '순손실 (M$)', data: [-82,-91,-97,-219], backgroundColor: ['#85B7EB','#378ADD','#185FA5','#E24B4A'], borderRadius: 5 }]
-  },
-  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} },
-    scales: { x:{ ticks:{color:tc,font:{size:12}}, grid:{color:gc} }, y:{ ticks:{color:tc,font:{size:11}, callback: v => (v<0?'-':'')+'$'+Math.abs(v)+'M'}, grid:{color:gc} } } }
-});
+  const macroDates = ['25.01','25.02','25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
+  const cmtg = [100,92,87,95,108,113,102,96,89,84,78,72,76,81,67];
+  const spx = [100,101,98,99,102,104,106,107,108,110,111,113,114,116,112];
+  const rua = [100,100,97,98,101,103,104,104,105,106,107,108,110,112,108];
+  const sofr = [100,100.3,100.6,100.9,101.2,101.5,101.7,101.9,102.1,102.2,102.3,102.5,102.6,102.6,102.5];
 
-new Chart(document.getElementById('liqChart'), {
-  type:'doughnut',
-  data:{ labels:['현금','미인출 한도'], datasets:[{data:[173,12], backgroundColor:['#185FA5','#9FE1CB'], borderWidth:0}] },
-  options:{ responsive:true, maintainAspectRatio:false, cutout:'70%', plugins:{legend:{display:false}} }
-});
+  new Chart(document.getElementById('corrChart'), {
+    type: 'line',
+    data: { labels: macroDates, datasets: [
+      { label:'CMTG', data:cmtg, borderColor:'#8ec5ff', tension:0.25, pointRadius:2 },
+      { label:'S&P 500', data:spx, borderColor:'#9ee37d', tension:0.25, pointRadius:2 },
+      { label:'Russell 3000', data:rua, borderColor:'#b7a7ff', tension:0.25, pointRadius:2 },
+      { label:'SOFR', data:sofr, borderColor:'#ff9a9a', tension:0.25, pointRadius:2 }
+    ]},
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:tc } } }, scales:{ x:{ ticks:{ color:tc }, grid:{ color:gc } }, y:{ ticks:{ color:tc }, grid:{ color:gc } } } }
+  });
 
-new Chart(document.getElementById('levPieChart'), {
-  type:'doughnut',
-  data:{ labels:['Repo','Term Participation','Notes Payable','REO Hotel','HPS TL'],
-    datasets:[{data:[1952,235,178,235,500], backgroundColor:['#185FA5','#9FE1CB','#EF9F27','#E24B4A','#5B50C8'], borderWidth:0}] },
-  options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{display:false}} }
-});
+  const corrSeries = [['Russell 3000', pearson(cmtg, rua)], ['S&P 500', pearson(cmtg, spx)], ['SOFR', pearson(cmtg, sofr)]].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  document.getElementById('corrRanking').innerHTML = corrSeries.map((x,i)=>`<div class="rank-item"><span>${i+1}. ${x[0]}</span><strong>${x[1].toFixed(2)}</strong></div>`).join('');
+  document.getElementById('bestCorrName').textContent = corrSeries[0][0];
+  document.getElementById('bestCorrVal').textContent = 'r = ' + corrSeries[0][1].toFixed(2);
+  document.getElementById('worstCorrName').textContent = corrSeries[corrSeries.length-1][0];
+  document.getElementById('worstCorrVal').textContent = 'r = ' + corrSeries[corrSeries.length-1][1].toFixed(2);
 
-new Chart(document.getElementById('spreadChart'), {
-  type:'bar',
-  data: { labels: ['Repo/Participation','Notes Payable','REO Hotel','HPS Term Loan'],
-    datasets: [{ label: 'Spread (bps)', data: [292,322,318,675], backgroundColor: ['#378ADD','#9FE1CB','#EF9F27','#E24B4A'], borderRadius: 5 }] },
-  options: { indexAxis:'y', responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:false} },
-    scales: { x:{ ticks:{color:tc,font:{size:11},callback:v=>v+'bps'}, grid:{color:gc} }, y:{ticks:{color:tc,font:{size:11}}, grid:{color:gc}} } }
-});
+  const pnav = [0.26,0.19,0.20,0.21,0.19];
+  const shortPct = [2.2,2.6,2.9,3.1,3.0];
+  document.getElementById('pnavShortCorr').textContent = pearson(pnav, shortPct).toFixed(2);
+  new Chart(document.getElementById('pnavShortChart'), {
+    data: { labels:['2025 Q1','2025 Q2','2025 Q3','2025 Q4','2026 Q1'], datasets:[
+      { type:'line', label:'P/NAV', data:pnav, borderColor:'#8ec5ff', yAxisID:'y1', tension:0.25, pointRadius:3 },
+      { type:'bar', label:'Short % Float', data:shortPct, backgroundColor:'rgba(255,154,154,0.45)', borderColor:'#ff9a9a', yAxisID:'y2' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:tc } } }, scales:{ y1:{ position:'left', ticks:{ color:tc }, grid:{ color:gc } }, y2:{ position:'right', ticks:{ color:tc }, grid:{ display:false } }, x:{ ticks:{ color:tc }, grid:{ color:gc } } } }
+  });
 
-// 1) correlation
-const macroDates = ['25.01','25.02','25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
-const cmtgIdx = [100,92,87,95,108,113,102,96,89,84,78,72,76,81,67];
-const spxIdx  = [100,101,98,99,102,104,106,107,108,110,111,113,114,116,112];
-const russellIdx = [100,100,97,98,101,103,104,104,105,106,107,108,110,112,108];
-const sofrIdx = [100,100.3,100.6,100.9,101.2,101.5,101.7,101.9,102.1,102.2,102.3,102.5,102.6,102.6,102.5];
+  new Chart(document.getElementById('holdersChart'), {
+    type:'doughnut',
+    data:{ labels:['Vanguard','BlackRock','Hyundai tag','State Street','Other'], datasets:[{ data:[8.4,5.6,4.2,2.1,79.7], backgroundColor:['#8ec5ff','#ff9a9a','#9ee37d','#ffc46b','#5a6572'], borderWidth:0 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'66%', plugins:{ legend:{ position:'bottom', labels:{ color:tc } } } }
+  });
 
-new Chart(document.getElementById('corrChart'), {
-  type:'line',
-  data:{
-    labels: macroDates,
-    datasets:[
-      { label:'CMTG', data:cmtgIdx, borderColor:'#185FA5', tension:0.25, pointRadius:2 },
-      { label:'S&P 500', data:spxIdx, borderColor:'#3B6D11', tension:0.25, pointRadius:2 },
-      { label:'Russell 3000', data:russellIdx, borderColor:'#5B50C8', tension:0.25, pointRadius:2 },
-      { label:'SOFR', data:sofrIdx, borderColor:'#E24B4A', tension:0.25, pointRadius:2 }
-    ]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ position:'bottom', labels:{ color:tc, boxWidth:12 } } },
-    scales:{ x:{ ticks:{ color:tc }, grid:{ color:gc } }, y:{ ticks:{ color:tc }, grid:{ color:gc } } }
-  }
-});
+  const cecl = [119.3,295.2,307.7,443.1];
+  const ceclDelta = [null,175.9,12.5,135.4];
+  new Chart(document.getElementById('ceclChart'), {
+    type:'bar',
+    data:{ labels:['2025 Q1','2025 Q2','2025 Q3','2025 Q4'], datasets:[{ data:cecl, backgroundColor:['#5f91c7','#4c7cae','#406a97','#ff9a9a'], borderRadius:6 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:tc }, grid:{ color:gc } }, y:{ ticks:{ color:tc }, grid:{ color:gc } } } }
+  });
+  new Chart(document.getElementById('ceclDeltaChart'), {
+    type:'line',
+    data:{ labels:['2025 Q1','2025 Q2','2025 Q3','2025 Q4'], datasets:[{ data:ceclDelta, borderColor:'#ff9a9a', tension:0.25, pointRadius:4 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:tc }, grid:{ color:gc } }, y:{ ticks:{ color:tc }, grid:{ color:gc } } } }
+  });
 
-const corrSeries = [
-  ['Russell 3000', pearson(cmtgIdx, russellIdx)],
-  ['S&P 500', pearson(cmtgIdx, spxIdx)],
-  ['SOFR', pearson(cmtgIdx, sofrIdx)]
-].sort((a,b)=>Math.abs(b[1]) - Math.abs(a[1]));
+  const peerLabels = ['25.01','25.02','25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
+  new Chart(document.getElementById('peerChart'), {
+    type:'line',
+    data:{ labels:peerLabels, datasets:[
+      { label:'CMTG', data:[100,92,87,95,108,113,102,96,89,84,78,72,76,81,67], borderColor:'#8ec5ff', tension:0.25, pointRadius:1.8 },
+      { label:'BXMT', data:[100,101,99,98,100,103,104,102,101,99,97,96,95,97,96], borderColor:'#ffc46b', tension:0.25, pointRadius:1.8 },
+      { label:'STWD', data:[100,102,101,103,104,106,107,106,108,110,111,113,114,112,111], borderColor:'#9ee37d', tension:0.25, pointRadius:1.8 },
+      { label:'KREF', data:[100,99,96,95,97,98,97,96,95,93,91,90,89,88,87], borderColor:'#ff9a9a', tension:0.25, pointRadius:1.8 },
+      { label:'ACRE', data:[100,98,95,94,96,95,94,92,91,90,88,86,85,83,82], borderColor:'#b7a7ff', tension:0.25, pointRadius:1.8 },
+      { label:'ARI', data:[100,100,97,96,98,97,96,95,94,93,92,91,90,89,88], borderColor:'#60d5c5', tension:0.25, pointRadius:1.8 },
+      { label:'TRTX', data:[100,101,99,97,98,100,101,99,98,97,96,95,94,93,92], borderColor:'#d68cff', tension:0.25, pointRadius:1.8 }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ color:tc, boxWidth:10 } } }, scales:{ x:{ ticks:{ color:tc }, grid:{ color:gc } }, y:{ ticks:{ color:tc }, grid:{ color:gc } } } }
+  });
 
-document.getElementById('corrRanking').innerHTML = corrSeries.map((x, i) =>
-  `<div class="rank-item"><span>${i+1}. ${x[0]}</span><strong>${x[1].toFixed(2)}</strong></div>`
-).join('');
-document.getElementById('bestCorrName').textContent = corrSeries[0][0];
-document.getElementById('bestCorrVal').textContent = 'r = ' + corrSeries[0][1].toFixed(2);
-document.getElementById('worstCorrName').textContent = corrSeries[corrSeries.length-1][0];
-document.getElementById('worstCorrVal').textContent = 'r = ' + corrSeries[corrSeries.length-1][1].toFixed(2);
-
-// 2) p/nav vs short
-const pnavLabels = ['2025 Q1','2025 Q2','2025 Q3','2025 Q4','2026 Q1'];
-const pnavSeries = [0.26,0.19,0.20,0.21,0.19];
-const shortPctSeries = [2.2,2.6,2.9,3.1,3.0];
-const pnavShortR = pearson(pnavSeries, shortPctSeries);
-document.getElementById('pnavShortCorr').textContent = pnavShortR.toFixed(2);
-
-new Chart(document.getElementById('pnavShortChart'), {
-  data:{
-    labels:pnavLabels,
-    datasets:[
-      { type:'line', label:'P/NAV', data:pnavSeries, borderColor:'#185FA5', backgroundColor:'rgba(24,95,165,0.10)', fill:false, yAxisID:'y1', tension:0.25, pointRadius:3 },
-      { type:'bar', label:'Short % Float', data:shortPctSeries, backgroundColor:'rgba(226,75,74,0.45)', borderColor:'#E24B4A', yAxisID:'y2' }
-    ]
-  },
-  options:{
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ position:'bottom', labels:{ color:tc } } },
-    scales:{
-      y1:{ position:'left', ticks:{ color:tc }, grid:{ color:gc } },
-      y2:{ position:'right', ticks:{ color:tc, callback:v=>v+'%' }, grid:{ display:false } },
-      x:{ ticks:{ color:tc }, grid:{ color:gc } }
+  async function loadTranscript() {
+    try {
+      const res = await fetch('/api/transcript?symbol=CMTG&quarter=Q4-2025');
+      if (!res.ok) throw new Error('api failed');
+      const data = await res.json();
+      document.getElementById('transcript-box').textContent = data.summaryKo || '응답 없음';
+    } catch (e) {
+      document.getElementById('transcript-box').textContent = '예시 요약\n- 핵심 메시지는 CECL 적립 확대, 문제 자산 해결, 레버리지 안정화입니다.\n- 경영진은 HPS term loan을 통해 일부 만기 리스크를 장기로 넘겼다는 점을 방어 논리로 사용했습니다.\n- 향후 체크포인트는 추가 충당금, 자산 해결 속도, 배당/자본 정책 재설정입니다.';
     }
   }
-});
-
-const months = ['24.10','24.11','24.12','25.01','25.02','25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03','26.04'];
-const volumes = [320,410,350,430,380,560,490,420,510,370,440,590,480,520,680,870,1200,750,410];
-new Chart(document.getElementById('volumeChart'), {
-  type:'bar',
-  data:{ labels:months, datasets:[{ label:'거래량 (천주)', data:volumes, backgroundColor: volumes.map(v => v>700?'#E24B4A':v>500?'#EF9F27':'#378ADD'), borderRadius:3 }] },
-  options:{ responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{ x:{ticks:{color:tc,font:{size:10},maxRotation:45,autoSkip:false}, grid:{color:gc}}, y:{ticks:{color:tc,font:{size:11},callback:v=>v+'K'}, grid:{color:gc}} } }
-});
-
-const shortMonths = ['25.03','25.04','25.05','25.06','25.07','25.08','25.09','25.10','25.11','25.12','26.01','26.02','26.03'];
-const shortData = [3.1,3.4,3.0,2.8,3.2,3.5,3.8,4.0,3.9,4.1,4.3,4.0,4.2];
-new Chart(document.getElementById('shortChart'), {
-  type:'line',
-  data:{ labels:shortMonths, datasets:[{ label:'대차잔고 (M주)', data:shortData, borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)', fill:true, tension:0.3, pointRadius:3, borderDash:[4,2] }] },
-  options:{ responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{ x:{ticks:{color:tc,font:{size:10}}, grid:{color:gc}}, y:{ticks:{color:tc,font:{size:11},callback:v=>v+'M'}, grid:{color:gc}} } }
-});
-
-// 4) major holders
-new Chart(document.getElementById('holdingChart'), {
-  type:'doughnut',
-  data:{ labels:['Vanguard','BlackRock','State Street','DFA','Insiders','Others'],
-    datasets:[{data:[8.4,5.6,2.1,1.8,1.5,80.6], backgroundColor:['#185FA5','#E24B4A','#3B6D11','#EF9F27','#5B50C8','#B4B2A9'], borderWidth:0}] },
-  options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{legend:{position:'bottom', labels:{color:tc}}} }
-});
-
-// 5) CECL
-const ceclLabels = ['2025 Q1','2025 Q2','2025 Q3','2025 Q4'];
-const ceclSeries = [119.3,295.2,307.7,443.1];
-const ceclDelta = [null,175.9,12.5,135.4];
-
-new Chart(document.getElementById('ceclChart'), {
-  type:'bar',
-  data:{ labels:ceclLabels, datasets:[{ label:'CECL ($M)', data:ceclSeries, backgroundColor:['#9ecae1','#6baed6','#3182bd','#E24B4A'], borderRadius:5 }] },
-  options:{ responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{ x:{ticks:{color:tc}, grid:{color:gc}}, y:{ticks:{color:tc, callback:v=>'$'+v+'M'}, grid:{color:gc}} } }
-});
-
-new Chart(document.getElementById('ceclDeltaChart'), {
-  type:'line',
-  data:{ labels:ceclLabels, datasets:[{ label:'QoQ Δ ($M)', data:ceclDelta, borderColor:'#E24B4A', backgroundColor:'rgba(226,75,74,0.08)', tension:0.25, pointRadius:4 }] },
-  options:{ responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{ x:{ticks:{color:tc}, grid:{color:gc}}, y:{ticks:{color:tc, callback:v=>'$'+v+'M'}, grid:{color:gc}} } }
-});
-
-// transcript stub
-async function loadTranscriptSummary() {
-  try {
-    const res = await fetch('/api/transcript?symbol=CMTG&quarter=Q4-2025');
-    if (!res.ok) throw new Error('no api');
-    const data = await res.json();
-    document.getElementById('transcriptSummary').textContent = data.summaryKo || '응답 없음';
-  } catch (e) {
-    document.getElementById('transcriptSummary').textContent =
-`예시 요약
-- 2025년 4분기 콜의 핵심은 대규모 CECL 적립과 장부가 훼손입니다.
-- 회사는 HPS 차입을 통해 단기 만기 리스크 일부를 장기로 전환했고, 유동성과 자산 해결 실적을 방어 논리로 제시했습니다.
-- 향후 모니터링 포인트는 문제 자산 회수 속도, 추가 충당금 가능성, 레버리지 안정화입니다.`;
-  }
-}
-loadTranscriptSummary();
+  loadTranscript();
 </script>
 </body>
 </html>
